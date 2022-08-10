@@ -22,6 +22,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,11 +31,13 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private ActivityMainBinding binding;
     private SmsBroadcastReceiver smsBroadcastReceiver;
+    private MySmsReceiver mySmsReceiver;
     private TextInputEditText etOTP;
 
 
     private void registerBroadcastReceiver() {
         smsBroadcastReceiver = new SmsBroadcastReceiver();
+
 
         MyApp.instance.getOtpIntent().observe(this, data -> {
             if (Objects.nonNull(data)) {
@@ -67,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         etOTP = binding.etOTP;
-        requestPermissionLauncher.launch(Manifest.permission.READ_SMS);
+        requestPermissionLauncher.launch(new String[]{Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS,Manifest.permission.SEND_SMS});
         startSmartUserConsent();
 
     }
@@ -107,9 +110,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private ActivityResultLauncher<String> requestPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                if (isGranted) {
+    private ActivityResultLauncher<String[]> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), (Map<String, Boolean> isGranted) -> {
+                if (!isGranted.isEmpty()) {
                     // Permission is granted. Continue the action or workflow in your
                     // app.
                 } else {
